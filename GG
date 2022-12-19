@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -71,9 +72,21 @@ public class FA1 implements ActionListener{
     JScrollPane sp;
     
 
+    //Panel North
+    JPanel panel_north;
+    JLabel lbl_img;
+    ImageIcon img;
+    
     
    FA1(){
     frame = new JFrame("FA");
+    
+    //for image
+    panel_north = new JPanel();
+    panel_north = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    img= new ImageIcon(new File("src/student.png").getAbsolutePath());
+    lbl_img = new JLabel(img);
+    panel_north.add(lbl_img);
     
     
     // for search
@@ -165,6 +178,9 @@ public class FA1 implements ActionListener{
     
     //insert east to frame 
     frame.add(panel_east, BorderLayout.EAST);
+    
+    //insert east to frame 
+    frame.add(panel_north, BorderLayout.NORTH);
     
     hide_deleteupdate();
     frame.pack();
