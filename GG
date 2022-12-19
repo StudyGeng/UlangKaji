@@ -255,7 +255,7 @@ public class FA1 implements ActionListener{
            //insert part 
            String sqlinsert = "INSERT INTO test(color) VALUES (?)";
            PreparedStatement stmt = conn.prepareStatement(sqlinsert);
-           stmt.setString(1, cb_color.getSelectedItem().toString());
+           stmt.setString(1, cb_color.getSelectedItem().toString());//combo box
            
             //this for integer
             //stmt.setInt(4, Integer.parseInt(tf_quantity.getText()));
@@ -352,6 +352,7 @@ public class FA1 implements ActionListener{
                rs.beforeFirst();
                while (rs.next()) {                   
                   txt_id.setText(rs.getString("ID"));//ambil dari table
+                  //txt_ic.setText(rs.getString("ic"));
                    if (rs.getString("Color").equals("Red")){
                         cb_color.setSelectedIndex(1);
                     }
