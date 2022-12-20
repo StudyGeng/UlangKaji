@@ -1,0 +1,348 @@
+
+package javaapplication158;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import javax.naming.spi.DirStateFactory.Result;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+
+
+public class JavaApplication158 implements ActionListener{
+
+    String db_name="root";
+    String db_pass="";
+    String db_url="jdbc:mysql://localhost:3306/good";
+    Connection conn;
+    ResultSet rs = null;
+    
+    JFrame frame;
+    
+    JPanel panel_west;
+    
+    JPanel panel_search;
+    JLabel lbl_search;
+    JTextField txt_search;
+    JButton btn_search;
+    TitledBorder tt_search;
+    
+    JPanel panel_info;
+    JLabel lbl_color;
+    JComboBox cb_color;
+    
+    JPanel panel_type;
+    JLabel lbl_type;
+    JComboBox cb_type;
+    
+    JPanel panel_quantity;
+    JLabel lbl_quantity;
+    JTextField txt_quantity;
+    
+    JPanel panel_name;
+    JLabel lbl_name;
+    JTextField txt_name;
+    
+    JPanel panel_button;
+    JButton btn_insert,btn_update,btn_delete;
+     
+    JPanel panel_east;
+    
+    JTable table;
+    
+    JScrollPane srcoll;
+  
+    JavaApplication158(){
+        frame = new JFrame("fa");
+        
+        panel_west = new JPanel();
+        panel_west.setLayout(new BoxLayout(panel_west,BoxLayout.Y_AXIS));
+        
+        panel_search = new JPanel();
+        panel_search.setLayout(new FlowLayout(FlowLayout.CENTER));
+        tt_search = new TitledBorder("Seacrh");
+        lbl_search = new JLabel("Search");
+        txt_search = new JTextField(20);
+        btn_search = new JButton("Search");
+        btn_search.addActionListener(this);
+        panel_search.add(lbl_search);
+        panel_search.add(txt_search);        
+        panel_search.add(btn_search);
+        panel_search.setBorder(tt_search);
+        
+        panel_info = new JPanel();
+        panel_info.setLayout(new FlowLayout(FlowLayout.CENTER));
+        lbl_color = new JLabel("color");
+        lbl_color.setPreferredSize(new Dimension(150,20));
+        String[] color = {"None","Red","Blue"};
+        cb_color = new JComboBox(color);
+        cb_color.setPreferredSize(new Dimension(200,20));
+        panel_info.add(lbl_color);
+        panel_info.add(cb_color);
+        
+        panel_type = new JPanel();
+        panel_type.setLayout(new FlowLayout(FlowLayout.CENTER));
+        lbl_type = new JLabel("Types");
+        lbl_type.setPreferredSize(new Dimension(150,20));
+        String[] type = {"None","Get","Nope"};
+        cb_type = new JComboBox(type);
+        cb_type.setPreferredSize(new Dimension(200,20));
+        panel_type.add(lbl_type);
+        panel_type.add(cb_type);
+        
+        panel_quantity = new JPanel();
+        lbl_quantity = new JLabel("Quantity");
+        lbl_quantity.setPreferredSize(new Dimension(150,20));
+        txt_quantity = new JTextField(20);
+        txt_quantity.setPreferredSize(new Dimension(200,20));
+        panel_quantity.add(lbl_quantity);
+        panel_quantity.add(txt_quantity);
+        
+        
+        panel_name = new JPanel();
+        lbl_name = new JLabel("Name");
+        lbl_name.setPreferredSize(new Dimension(150,20));
+        txt_name = new JTextField(20);
+        txt_name.setPreferredSize(new Dimension(200,20));
+        panel_name.add(lbl_name);
+        panel_name.add(txt_name);
+        
+        
+        panel_button = new JPanel();
+        panel_button.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        btn_insert = new JButton("Insert");
+        btn_insert.addActionListener(this);
+        btn_update = new JButton("Update");
+        btn_update.addActionListener(this);
+        btn_delete = new JButton("Delete");
+        btn_delete.addActionListener(this);
+        panel_button.add(btn_insert);
+        panel_button.add(btn_update);
+        panel_button.add(btn_delete);
+        
+        
+        panel_west.add(panel_search);
+        panel_west.add(panel_info);
+        panel_west.add(panel_type);
+        panel_west.add(panel_quantity);
+        panel_west.add(panel_name);
+        panel_west.add(panel_button);
+        
+        
+        
+        panel_east = new JPanel();
+        
+        try{
+            table = new JTable();
+            draw_table();
+            srcoll = new JScrollPane(table);
+            srcoll.setPreferredSize(new Dimension(600,200));
+            srcoll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(frame, "Error" + ex);
+        }
+            panel_east.add(srcoll);
+        
+        
+        frame.add(panel_west,BorderLayout.WEST);
+        frame.add(panel_east,BorderLayout.EAST);
+        
+        frame.pack();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+    
+    public DefaultTableModel buildTableModel(ResultSet rs) throws SQLException{
+        ResultSetMetaData metaData = rs.getMetaData();
+        Vector<String> columname = new Vector<String>();
+        columname.add("id");
+        columname.add("color");
+        columname.add("type");
+        columname.add("quantity");
+        columname.add("name");
+        
+        int columncount = metaData.getColumnCount();
+        
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        
+        while(rs.next()){
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnindex = 1 ; columnindex <= columncount ; columnindex++){
+                vector.add(rs.getObject(columnindex));
+            }data.add(vector);
+            
+        }return new DefaultTableModel(data,columname);   
+ }
+    
+    public void fetch_all(){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn =DriverManager.getConnection(db_url,db_name,db_pass);
+            String sql = "SELECT * FROM test";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            rs = stmt.executeQuery();
+            
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(frame, "ERROR" + ex);           
+       }
+    }
+
+    public void draw_table(){
+        try{
+            fetch_all();
+            table.setModel(buildTableModel(rs));
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(frame, "ERROR" + ex);
+        }
+        
+    }
+    
+    public static void main(String[] args) {
+       JavaApplication158 apps = new JavaApplication158();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+       if(e.getSource() == btn_insert){
+           insert();
+       }
+       
+       if(e.getSource() == btn_update){
+           update();
+       }
+        
+       if(e.getSource() == btn_delete){
+           delete();
+       }
+       
+       if(e.getSource() == btn_search){
+           search();
+       }
+    }
+    
+    public void insert(){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(db_url,db_name,db_pass);
+            String sqlinsert = "INSERT INTO test (color,type,quantity,name) VALUES (?,?,?,?)";
+            PreparedStatement stmt = conn.prepareStatement(sqlinsert);
+            stmt.setString(1,cb_color.getSelectedItem().toString());
+            stmt.setString(2,cb_type.getSelectedItem().toString());
+            stmt.setInt(3,Integer.parseInt(txt_quantity.getText()));
+            stmt.setString(4, txt_name.getText());
+            
+            int insert;
+            insert = stmt.executeUpdate();
+            
+            if(insert > 0 ){
+                JOptionPane.showMessageDialog(frame, "Success");
+            }else{
+                JOptionPane.showMessageDialog(frame, "Fail");
+            }draw_table();
+            
+        }catch (Exception ex){
+            JOptionPane.showMessageDialog(frame, "Errpr" + ex);
+        }
+    }
+    
+    public void update(){
+    try{
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        conn = DriverManager.getConnection(db_url,db_name,db_pass);
+        String sqlupdate = "UPDATE test SET color=?, type=?, quantity=? WHERE name=?";
+        PreparedStatement stmt = conn.prepareStatement(sqlupdate);
+        stmt.setString(1,cb_color.getSelectedItem().toString());
+        stmt.setString(2,cb_type.getSelectedItem().toString());
+        stmt.setInt(3,Integer.parseInt(txt_quantity.getText()));
+        stmt.setString(4, txt_name.getText());
+        
+        int update;
+        update = stmt.executeUpdate();
+        
+        if(update > 0){
+            JOptionPane.showMessageDialog(frame, "Updated");
+        }else{
+            JOptionPane.showMessageDialog(frame, "Failed");
+            
+        }draw_table();
+        
+    }catch(Exception ex){
+        JOptionPane.showMessageDialog(frame, "error" +ex);
+    }
+  
+ }
+    
+    public void delete(){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(db_url,db_name,db_pass);
+            String sqldelete = "DELETE FROM test WHERE name=?";
+            PreparedStatement stmt = conn.prepareStatement(sqldelete);
+            stmt.setString(1,txt_name.getText());
+            
+            int delete;
+            delete = stmt.executeUpdate();
+            
+            if(delete > 0){
+                JOptionPane.showMessageDialog(frame,"Deleted");
+            }else {
+                JOptionPane.showMessageDialog(frame,"Failed");
+            }draw_table();
+            
+        }catch(Exception ex){
+                JOptionPane.showMessageDialog(frame,"Error" + ex);
+        }
+    }
+    
+    public void search(){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(db_url,db_name,db_pass);
+            String sqlsearch = "SELECT * FROM test WHERE id=?";
+            PreparedStatement stmt = conn.prepareStatement(sqlsearch,ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            stmt.setInt(1,Integer.parseInt(txt_search.getText()));
+            rs = stmt.executeQuery();
+            
+            if(rs.next()){
+                rs.beforeFirst();
+                while (rs.next()){
+                    if (rs.getString("Color").equals("Red")){
+                        cb_color.setSelectedIndex(1);
+                    }
+                    else{
+                        cb_color.setSelectedIndex(2);
+                    }
+                    
+                    if (rs.getString("type").equals("Get")){
+                        cb_type.setSelectedIndex(1);
+                    }else{
+                        cb_type.setSelectedIndex(2);
+                    }
+                    
+                    txt_quantity.setText(rs.getString("quantity"));
+                    txt_name.setText(rs.getString("name"));
+                    JOptionPane.showMessageDialog(frame, "Data Found" );
+                }
+                
+            }else{
+                JOptionPane.showMessageDialog(frame, "No found" );
+            }
+                
+                    
+            
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(frame, "ERROR " + ex);
+        }
+    }
+}
